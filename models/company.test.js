@@ -87,6 +87,80 @@ describe("findAll", function () {
   });
 });
 
+/************************************** findFiltered */
+
+describe("findFiltered", function () {
+  test("works: all filters (3)", async function () {
+    const dataToFilter = {name: "1", minEmployees: 1, maxEmployees:1}
+    let companies = await Company.findFiltered(dataToFilter);
+    expect(companies).toEqual([
+      {
+        handle: "c1",
+        name: "C1",
+        description: "Desc1",
+        numEmployees: 1,
+        logoUrl: "http://c1.img",
+      }
+    ]);
+  });
+  test("works: name: partial name, case-insensitive", async function () {
+    const dataToFilter = {name: "c"}
+    let companies = await Company.findFiltered();
+    expect(companies).toEqual([
+      {
+        handle: "c1",
+        name: "C1",
+        description: "Desc1",
+        numEmployees: 1,
+        logoUrl: "http://c1.img",
+      },
+      {
+        handle: "c2",
+        name: "C2",
+        description: "Desc2",
+        numEmployees: 2,
+        logoUrl: "http://c2.img",
+      },
+      {
+        handle: "c3",
+        name: "C3",
+        description: "Desc3",
+        numEmployees: 3,
+        logoUrl: "http://c3.img",
+      },
+    ]);
+  });
+  test("works: single filter (1)", async function () {
+    const dataToFilter = { minEmployees:2 }
+    let companies = await Company.findFiltered(dataToFilter);
+    expect(companies).toEqual([
+      {
+        handle: "c2",
+        name: "C2",
+        description: "Desc2",
+        numEmployees: 2,
+        logoUrl: "http://c2.img",
+      },
+      {
+        handle: "c3",
+        name: "C3",
+        description: "Desc3",
+        numEmployees: 3,
+        logoUrl: "http://c3.img",
+      },
+    ]);
+  });
+  test("works: conflicting filters", async function () {
+    const dataToFilter = { minEmployees: 3, maxEmployees:1 }
+    try {
+      await Company.findFiltered(dataToFilter);
+      fail();
+    } catch(err) {
+      expect(err instanceof BadRequestError).toBeTruthy();
+    }
+  });
+});
+
 /************************************** get */
 
 describe("get", function () {

@@ -66,6 +66,60 @@ class Company {
     return companiesRes.rows;
   }
 
+  static async findFiltered() {
+    const companiesRes = await db.query(
+        `SELECT handle,
+                name,
+                description,
+                num_employees AS "numEmployees",
+                logo_url AS "logoUrl"
+           FROM companies
+
+           ORDER BY name`);
+    return companiesRes.rows;
+  }
+
+
+  SELECT handle,
+        name,
+        description,
+        num_employees AS "numEmployees",
+        logo_url AS "logoUrl"
+  FROM companies
+  WHERE name ILIKE "%net%"
+  ORDER BY name;
+
+  SELECT handle,
+        name,
+        description,
+        num_employees AS "numEmployees",
+        logo_url AS "logoUrl"
+  FROM companies
+  WHERE minEmployees < 100
+  ORDER BY name;
+
+  SELECT handle,
+  name,
+  description,
+  num_employees AS "numEmployees",
+  logo_url AS "logoUrl"
+FROM companies
+WHERE maxEmployees > 100
+ORDER BY name;
+
+SELECT handle,
+  name,
+  description,
+  num_employees AS "numEmployees",
+  logo_url AS "logoUrl"
+FROM companies
+WHERE minEmployees < 100
+WHERE maxEmployees > 100
+ORDER BY name;
+//throws 400 error ('Employee range is conflicting)
+
+
+
   /** Given a company handle, return data about company.
    *
    * Returns { handle, name, description, numEmployees, logoUrl, jobs }
