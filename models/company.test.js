@@ -91,7 +91,7 @@ describe("findAll", function () {
 
 describe("findFiltered", function () {
   test("works: all filters (3)", async function () {
-    const dataToFilter = {name: "1", minEmployees: 1, maxEmployees:1}
+    const dataToFilter = {name: "c", minEmployees: 1, maxEmployees:1}
     let companies = await Company.findFiltered(dataToFilter);
     expect(companies).toEqual([
       {
@@ -105,7 +105,7 @@ describe("findFiltered", function () {
   });
   test("works: name: partial name, case-insensitive", async function () {
     const dataToFilter = {name: "c"}
-    let companies = await Company.findFiltered();
+    let companies = await Company.findFiltered(dataToFilter);
     expect(companies).toEqual([
       {
         handle: "c1",
@@ -151,7 +151,7 @@ describe("findFiltered", function () {
     ]);
   });
   test("works: conflicting filters", async function () {
-    const dataToFilter = { minEmployees: 3, maxEmployees:1 }
+    const dataToFilter = {};
     try {
       await Company.findFiltered(dataToFilter);
       fail();

@@ -2,7 +2,7 @@
 
 const db = require("../db");
 const { BadRequestError, NotFoundError } = require("../expressError");
-const { sqlForPartialUpdate } = require("../helpers/sql");
+const { sqlForPartialUpdate, sqlForFiltering } = require("../helpers/sql");
 
 /** Related functions for companies. */
 
@@ -66,56 +66,75 @@ class Company {
     return companiesRes.rows;
   }
 
-  static async findFiltered() {
-    const companiesRes = await db.query(
-        `SELECT handle,
-                name,
-                description,
-                num_employees AS "numEmployees",
-                logo_url AS "logoUrl"
-           FROM companies
+  /** Find filtered companies by name, minEmployees, maxEmployees
+   *
+   * Returns [{ handle, name, description, numEmployees, logoUrl }, ...]
+   */
 
-           ORDER BY name`);
-    return companiesRes.rows;
+  static async findFiltered(data) {
+    const { filterCols } = sqlForFiltering(
+      data,
+      {
+        minEmployees: "num_employees",
+        maxEmployees: "num_employees"
+      });
+
+    const querySql = `
+      SELECT handle,
+            name,
+            description,
+            num_employees AS "numEmployees",
+            logo_url AS "logoUrl"
+      FROM companies
+      WHERE ${filterCols}
+      ORDER BY name
+    `
+
+    const results = await db.query(querySql);
+    const companies = results.rows;
+
+    if (!companies) throw new NotFoundError(`No companies found.`);
+
+    return companies;
   }
 
 
-  SELECT handle,
-        name,
-        description,
-        num_employees AS "numEmployees",
-        logo_url AS "logoUrl"
-  FROM companies
-  WHERE name ILIKE "%net%"
-  ORDER BY name;
+//   SELECT handle,
+//         name,
+//         description,
+//         num_employees AS "numEmployees",
+//         logo_url AS "logoUrl"
+//   FROM companies
+//   WHERE name ILIKE "%net%"
+//   ORDER BY name;
 
-  SELECT handle,
-        name,
-        description,
-        num_employees AS "numEmployees",
-        logo_url AS "logoUrl"
-  FROM companies
-  WHERE minEmployees < 100
-  ORDER BY name;
+//   SELECT handle,
+//         name,
+//         description,
+//         num_employees AS "numEmployees",
+//         logo_url AS "logoUrl"
+//   FROM companies
+//   WHERE minEmployees < 100
+//   ORDER BY name;
 
-  SELECT handle,
-  name,
-  description,
-  num_employees AS "numEmployees",
-  logo_url AS "logoUrl"
-FROM companies
-WHERE maxEmployees > 100
-ORDER BY name;
+//   SELECT handle,
+//   name,
+//   description,
+//   num_employees AS "numEmployees",
+//   logo_url AS "logoUrl"
+// FROM companies
+// WHERE maxEmployees > 100
+// ORDER BY name;
 
-SELECT handle,
-  name,
-  description,
-  num_employees AS "numEmployees",
-  logo_url AS "logoUrl"
-FROM companies
-WHERE minEmployees < 100
-WHERE maxEmployees > 100
-ORDER BY name;
+// SELECT handle,
+//   name,
+//   description,
+//   num_employees AS "numEmployees",
+//   logo_url AS "logoUrl"
+// FROM companies
+// WHERE minEmployees < 100
+// WHERE maxEmployees > 100
+// ORDER BY name;
 //throws 400 error ('Employee range is conflicting)
 
 

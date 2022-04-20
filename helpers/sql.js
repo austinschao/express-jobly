@@ -27,7 +27,7 @@ function sqlForPartialUpdate(dataToUpdate, jsToSql) {
 
   // {firstName: 'Aliya', age: 32} => ['first_name=$1', 'age=$2']
   const cols = keys.map((colName, idx) =>
-  `"${jsToSql[colName] || colName}"=$${idx + 1}`,
+  `"${jsToSql[colName] || colName}"=$${idx + 1}`
   );
 
   return {
@@ -36,4 +36,35 @@ function sqlForPartialUpdate(dataToUpdate, jsToSql) {
   };
 }
 
-module.exports = { sqlForPartialUpdate };
+
+/** Creating SQL query for fields for filtering
+ * @param {obj}
+ *
+ * dataToFilter => {name: "net", minEmployees: 1, maxEmployees: 3}
+ * jsToSql => {minEmployees: "min_employees", maxEmployees: "max_employees"}
+ *
+ * @returns {obj}
+ * {filterCols:'"name"=$1, "min_employees"=$2, "max_employees"=$3',
+      values:['net', 1, 3]}
+ */
+
+function sqlForFiltering(dataToFilter, jsToSql) {
+  const symbols = { name: "=", minEmployees: ">=", maxEmployees: "<=" };
+  const keys = Object.keys(dataToFilter);
+  if (keys.length === 0) throw new BadRequestError("No data");
+  const values = Object.values(dataToFilter);
+
+
+  const cols = keys.map((colName, idx) =>
+    `${jsToSql[colName] || colName} ${symbols[colName]} ${values[idx]}`
+  );
+
+  return {
+    filterCols: cols.join(" AND ")
+  };
+}
+// WHERE name = "net" AND min_employees = 1 AND max_employees = 3
+
+
+
+module.exports = { sqlForPartialUpdate, sqlForFiltering };
