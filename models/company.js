@@ -72,7 +72,7 @@ class Company {
    */
 
   static async findFiltered(data) {
-    const { filterCols } = sqlForFiltering(
+    const { filterCols, values } = sqlForFiltering(
       data,
       {
         minEmployees: "num_employees",
@@ -89,55 +89,13 @@ class Company {
       WHERE ${filterCols}
       ORDER BY name
     `
-
-    const results = await db.query(querySql);
-    const companies = results.rows;
+    const result = await db.query(querySql, [...values]);
+    const companies = result.rows;
 
     if (!companies) throw new NotFoundError(`No companies found.`);
 
     return companies;
   }
-
-
-//   SELECT handle,
-//         name,
-//         description,
-//         num_employees AS "numEmployees",
-//         logo_url AS "logoUrl"
-//   FROM companies
-//   WHERE name ILIKE "%net%"
-//   ORDER BY name;
-
-//   SELECT handle,
-//         name,
-//         description,
-//         num_employees AS "numEmployees",
-//         logo_url AS "logoUrl"
-//   FROM companies
-//   WHERE minEmployees < 100
-//   ORDER BY name;
-
-//   SELECT handle,
-//   name,
-//   description,
-//   num_employees AS "numEmployees",
-//   logo_url AS "logoUrl"
-// FROM companies
-// WHERE maxEmployees > 100
-// ORDER BY name;
-
-// SELECT handle,
-//   name,
-//   description,
-//   num_employees AS "numEmployees",
-//   logo_url AS "logoUrl"
-// FROM companies
-// WHERE minEmployees < 100
-// WHERE maxEmployees > 100
-// ORDER BY name;
-//throws 400 error ('Employee range is conflicting)
-
-
 
   /** Given a company handle, return data about company.
    *

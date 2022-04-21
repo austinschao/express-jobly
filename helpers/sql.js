@@ -49,22 +49,24 @@ function sqlForPartialUpdate(dataToUpdate, jsToSql) {
  */
 
 function sqlForFiltering(dataToFilter, jsToSql) {
-  const symbols = { name: "=", minEmployees: ">=", maxEmployees: "<=" };
+  const symbols = { name: "ILIKE", minEmployees: ">=", maxEmployees: "<=" };
   const keys = Object.keys(dataToFilter);
   if (keys.length === 0) throw new BadRequestError("No data");
   const values = Object.values(dataToFilter);
 
 
-  const cols = keys.map((colName, idx) =>
-    `${jsToSql[colName] || colName} ${symbols[colName]} ${values[idx]}`
-  );
-
+  const cols = keys.map(function (colName, idx) {
+    if (colName === "name") {
+      values[idx] = `%${values[idx]}%`; //reassigning to modify to "%net%"
+      return `${colName} ILIKE $${idx + 1}`;
+    } else {
+      return `${jsToSql[colName]} ${symbols[colName]} $${idx + 1}`;
+    }
+  });
   return {
-    filterCols: cols.join(" AND ")
+    filterCols: cols.join(" AND "),
+    values
   };
 }
-// WHERE name = "net" AND min_employees = 1 AND max_employees = 3
-
-
 
 module.exports = { sqlForPartialUpdate, sqlForFiltering };

@@ -99,7 +99,7 @@ describe("GET /companies", function () {
   test("ok for anon, filtering results", async function () {
     const resp = await request(app)
                         .get("/companies")
-                        .send({ name: 'C1', minEmployees: 1, maxEmployees:1 });
+                        .query({ name: 'C1', minEmployees: 1, maxEmployees:1 });
     expect(resp.body).toEqual({
       companies:
           [
@@ -116,8 +116,8 @@ describe("GET /companies", function () {
 
   test("ok for anon, invalid filter", async function () {
     const resp = await request(app)
-                        .get("/companies")
-                        .send({ location: 'CA' });
+                        .get("/companies?location=CA")
+                        // .query({ location: 'CA' });
     expect(resp.statusCode).toEqual(400);
   });
 

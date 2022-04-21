@@ -48,13 +48,20 @@ router.post("/", ensureLoggedIn, async function (req, res, next) {
  */
 
 router.get("/", async function (req, res, next) {
-  if (req.query) {
-    const validator = jsonschema.validate(req.query, companyFilterSchema);
+  const rQuery = {...req.query};
+  if (Object.keys(rQuery).length) {
+    if(rQuery.minEmployees) {
+      rQuery.minEmployees = parseInt(rQuery.minEmployees)
+    };
+    if(rQuery.maxEmployees) {
+      rQuery.maxEmployees = parseInt(rQuery.maxEmployees)
+    };
+    const validator = jsonschema.validate(rQuery, companyFilterSchema);
     if (!validator.valid) {
       const errs = validator.errors.map(e => e.stack);
       throw new BadRequestError(errs);
     } else {
-      const companies = await Company.findFiltered(req.query);
+      const companies = await Company.findFiltered(rQuery);
       return res.json({ companies });
     }
   }
