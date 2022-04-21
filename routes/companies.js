@@ -21,17 +21,17 @@ const router = new express.Router();
  *
  * Returns { handle, name, description, numEmployees, logoUrl }
  *
- * Authorization required: login
+ * Authorization required: login, isAdmin
  */
 
 router.post("/", ensureLoggedIn, async function (req, res, next) {
+  if (!res.locals.user.isAdmin) throw new UnauthorizedError();
+
   const validator = jsonschema.validate(req.body, companyNewSchema);
   if (!validator.valid) {
     const errs = validator.errors.map((e) => e.stack);
     throw new BadRequestError(errs);
   }
-
-  if (!res.locals.user.isAdmin) throw new UnauthorizedError();
 
   const company = await Company.create(req.body);
   return res.status(201).json({ company });
@@ -91,17 +91,17 @@ router.get("/:handle", async function (req, res, next) {
  *
  * Returns { handle, name, description, numEmployees, logo_url }
  *
- * Authorization required: login
+ * Authorization required: login, isAdmin
  */
 
 router.patch("/:handle", ensureLoggedIn, async function (req, res, next) {
+  if (!res.locals.user.isAdmin) throw new UnauthorizedError();
+
   const validator = jsonschema.validate(req.body, companyUpdateSchema);
   if (!validator.valid) {
     const errs = validator.errors.map((e) => e.stack);
     throw new BadRequestError(errs);
   }
-
-  if (!res.locals.user.isAdmin) throw new UnauthorizedError();
 
   const company = await Company.update(req.params.handle, req.body);
   return res.json({ company });
@@ -109,11 +109,12 @@ router.patch("/:handle", ensureLoggedIn, async function (req, res, next) {
 
 /** DELETE /[handle]  =>  { deleted: handle }
  *
- * Authorization: login
+ * Authorization: login, isAdmin
  */
 
 router.delete("/:handle", ensureLoggedIn, async function (req, res, next) {
   if (!res.locals.user.isAdmin) throw new UnauthorizedError();
+
   await Company.remove(req.params.handle);
   return res.json({ deleted: req.params.handle });
 });
