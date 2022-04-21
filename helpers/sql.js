@@ -1,6 +1,5 @@
 const { BadRequestError } = require("../expressError");
 
-
 /**  Creating SQL query for fields for partial update.
  *
  * @param {obj, obj}
@@ -26,8 +25,8 @@ function sqlForPartialUpdate(dataToUpdate, jsToSql) {
   if (keys.length === 0) throw new BadRequestError("No data");
 
   // {firstName: 'Aliya', age: 32} => ['first_name=$1', 'age=$2']
-  const cols = keys.map((colName, idx) =>
-  `"${jsToSql[colName] || colName}"=$${idx + 1}`
+  const cols = keys.map(
+    (colName, idx) => `"${jsToSql[colName] || colName}"=$${idx + 1}`
   );
 
   return {
@@ -35,7 +34,6 @@ function sqlForPartialUpdate(dataToUpdate, jsToSql) {
     values: Object.values(dataToUpdate),
   };
 }
-
 
 /** Creating SQL query for fields for filtering
  * @param {obj}
@@ -51,9 +49,9 @@ function sqlForPartialUpdate(dataToUpdate, jsToSql) {
 function sqlForFiltering(dataToFilter, jsToSql) {
   const symbols = { name: "ILIKE", minEmployees: ">=", maxEmployees: "<=" };
   const keys = Object.keys(dataToFilter);
+
   if (keys.length === 0) throw new BadRequestError("No data");
   const values = Object.values(dataToFilter);
-
 
   const cols = keys.map(function (colName, idx) {
     if (colName === "name") {
@@ -65,7 +63,7 @@ function sqlForFiltering(dataToFilter, jsToSql) {
   });
   return {
     filterCols: cols.join(" AND "),
-    values
+    values,
   };
 }
 

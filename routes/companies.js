@@ -5,7 +5,7 @@
 const jsonschema = require("jsonschema");
 const express = require("express");
 
-const { BadRequestError } = require("../expressError");
+const { BadRequestError, UnauthorizedError } = require("../expressError");
 const { ensureLoggedIn } = require("../middleware/auth");
 const Company = require("../models/company");
 
@@ -14,7 +14,6 @@ const companyUpdateSchema = require("../schemas/companyUpdate.json");
 const companyFilterSchema = require("../schemas/companyFilter.json");
 
 const router = new express.Router();
-
 
 /** POST / { company } =>  { company }
  *
@@ -28,9 +27,11 @@ const router = new express.Router();
 router.post("/", ensureLoggedIn, async function (req, res, next) {
   const validator = jsonschema.validate(req.body, companyNewSchema);
   if (!validator.valid) {
-    const errs = validator.errors.map(e => e.stack);
+    const errs = validator.errors.map((e) => e.stack);
     throw new BadRequestError(errs);
   }
+
+  if (!res.locals.user.isAdmin) throw new UnauthorizedError();
 
   const company = await Company.create(req.body);
   return res.status(201).json({ company });
@@ -48,17 +49,17 @@ router.post("/", ensureLoggedIn, async function (req, res, next) {
  */
 
 router.get("/", async function (req, res, next) {
-  const rQuery = {...req.query};
+  const rQuery = { ...req.query };
   if (Object.keys(rQuery).length) {
-    if(rQuery.minEmployees) {
-      rQuery.minEmployees = parseInt(rQuery.minEmployees)
-    };
-    if(rQuery.maxEmployees) {
-      rQuery.maxEmployees = parseInt(rQuery.maxEmployees)
-    };
+    if (rQuery.minEmployees) {
+      rQuery.minEmployees = parseInt(rQuery.minEmployees);
+    }
+    if (rQuery.maxEmployees) {
+      rQuery.maxEmployees = parseInt(rQuery.maxEmployees);
+    }
     const validator = jsonschema.validate(rQuery, companyFilterSchema);
     if (!validator.valid) {
-      const errs = validator.errors.map(e => e.stack);
+      const errs = validator.errors.map((e) => e.stack);
       throw new BadRequestError(errs);
     } else {
       const companies = await Company.findFiltered(rQuery);
@@ -96,9 +97,11 @@ router.get("/:handle", async function (req, res, next) {
 router.patch("/:handle", ensureLoggedIn, async function (req, res, next) {
   const validator = jsonschema.validate(req.body, companyUpdateSchema);
   if (!validator.valid) {
-    const errs = validator.errors.map(e => e.stack);
+    const errs = validator.errors.map((e) => e.stack);
     throw new BadRequestError(errs);
   }
+
+  if (!res.locals.user.isAdmin) throw new UnauthorizedError();
 
   const company = await Company.update(req.params.handle, req.body);
   return res.json({ company });
@@ -110,9 +113,9 @@ router.patch("/:handle", ensureLoggedIn, async function (req, res, next) {
  */
 
 router.delete("/:handle", ensureLoggedIn, async function (req, res, next) {
+  if (!res.locals.user.isAdmin) throw new UnauthorizedError();
   await Company.remove(req.params.handle);
   return res.json({ deleted: req.params.handle });
 });
-
 
 module.exports = router;
