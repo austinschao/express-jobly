@@ -80,12 +80,9 @@ function ensureAuthUser(req, res, next) {
  */
 
 function ensureAdminOrAuthUser(req, res, next) {
+  const user = res.locals.user;
   try {
-    if (
-      !res.locals.user ||
-      (!res.locals.user.isAdmin &&
-        res.locals.user.username !== req.params.username)
-    ) {
+    if (!user || (!user.isAdmin && user.username !== req.params.username)) {
       throw new UnauthorizedError();
     }
     return next();

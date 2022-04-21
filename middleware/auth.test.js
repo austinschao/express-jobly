@@ -113,7 +113,7 @@ describe("ensureAuthUser", function () {
   test("works", function () {
     expect.assertions(1);
     const req = { params: { username: "test" } };
-    const res = { locals: { user: { username: "test", isAdmin: false } } };
+    const res = { locals: { user: { username: "test" } } };
     const next = function (err) {
       expect(err).toBeFalsy();
     };
@@ -123,7 +123,7 @@ describe("ensureAuthUser", function () {
   test("unauth if not correct user", function () {
     expect.assertions(1);
     const req = { params: { username: "test2" } };
-    const res = { locals: { user: { username: "test", isAdmin: false } } };
+    const res = { locals: { user: { username: "test" } } };
     const next = function (err) {
       expect(err instanceof UnauthorizedError).toBeTruthy();
     };
