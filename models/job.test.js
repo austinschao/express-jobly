@@ -21,8 +21,8 @@ describe("create", function () {
   const newJob = {
     title: "new",
     salary: 100000,
-    equity: 0.5,
-    company_handle: "c1",
+    equity: "0.081",
+    companyHandle: "c1",
   };
 
   test("works", async function () {
@@ -30,24 +30,24 @@ describe("create", function () {
     expect(job).toEqual(newJob);
 
     const result = await db.query(
-      `SELECT title, salary, equity, company_handle AS "companyHandle"
+      `SELECT title, salary, equity, company_handle
            FROM jobs
            WHERE title = 'new'`
     );
     expect(result.rows).toEqual([
       {
         title: "new",
-        salary: "New",
-        equity: "New equity",
-        company_handle: 1,
+        salary: 100000,
+        equity: "0.081",
+        company_handle: "c1",
       },
     ]);
   });
 
   test("bad request with dupe", async function () {
     try {
-      await Company.create(newJob);
-      await Company.create(newJob);
+      await Job.create(newJob);
+      await Job.create(newJob);
       fail();
     } catch (err) {
       expect(err instanceof BadRequestError).toBeTruthy();
@@ -64,20 +64,20 @@ describe("findAll", function () {
       {
         title: "j1",
         salary: 100000,
-        equity: 0.5,
-        company_handle: "c1",
+        equity: "0.5",
+        companyHandle: "c1",
       },
       {
-        title: "c2",
+        title: "j2",
         salary: 100000,
-        equity: 0.5,
-        company_handle: "c2",
+        equity: "0.5",
+        companyHandle: "c2",
       },
       {
-        title: "c3",
+        title: "j3",
         salary: 100000,
-        equity: 0.5,
-        company_handle: "c3",
+        equity: "0.5",
+        companyHandle: "c3",
       },
     ]);
   });
@@ -162,8 +162,8 @@ describe("get", function () {
     expect(job).toEqual({
       title: "j1",
       salary: 100000,
-      equity: 0.5,
-      company_handle: "c1",
+      equity: "0.5",
+      companyHandle: "c1",
     });
   });
 
@@ -182,8 +182,8 @@ describe("get", function () {
 describe("update", function () {
   const updateData = {
     salary: 100,
-    equity: 0.5,
-    company_handle: "c1",
+    equity: "0.5",
+    companyHandle: "c1",
   };
 
   test("works", async function () {
@@ -202,8 +202,8 @@ describe("update", function () {
       {
         title: "j1",
         salary: 100,
-        equity: 0.5,
-        company_handle: "c1",
+        equity: "0.5",
+        companyHandle: "c1",
       },
     ]);
   });
@@ -211,11 +211,11 @@ describe("update", function () {
   test("works: null fields", async function () {
     const updateDataSetNulls = {
       salary: 100000,
-      equity: 0.5,
-      company_handle: null,
+      equity: "0.5",
+      companyHandle: "c1",
     };
 
-    let job = await Job.update("c1", updateDataSetNulls);
+    let job = await Job.update("j1", updateDataSetNulls);
     expect(job).toEqual({
       title: "j1",
       ...updateDataSetNulls,
@@ -230,9 +230,8 @@ describe("update", function () {
       {
         title: "j1",
         salary: 100000,
-        equity: 0.5,
-        company_handle: null,
-        logo_url: null,
+        equity: "0.5",
+        company_handle: "c1",
       },
     ]);
   });

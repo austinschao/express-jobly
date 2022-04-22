@@ -16,7 +16,7 @@ class Job {
    * Throws BadRequestError if job already in database.
    * */
 
-  static async create({ title, salary, equity, company_handle }) {
+  static async create({ title, salary, equity, companyHandle }) {
     const duplicateCheck = await db.query(
       `SELECT title
            FROM jobs
@@ -32,11 +32,11 @@ class Job {
           title,
           salary,
           equity,
-          company_handle AS "companyHandle"
-           VALUES
+          company_handle)
+          VALUES
              ($1, $2, $3, $4)
-           RETURNING title, salary, equity, companyHandle`,
-      [title, salary, equity, company_handle]
+           RETURNING title, salary, equity, company_handle AS "companyHandle"`,
+      [title, salary, equity, companyHandle]
     );
     const job = result.rows[0];
 
@@ -98,7 +98,7 @@ class Job {
    **/
 
   static async get(title) {
-    const companyRes = await db.query(
+    const jobRes = await db.query(
       `SELECT title,
                 salary,
                 equity,
