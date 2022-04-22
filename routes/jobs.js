@@ -17,9 +17,9 @@ const router = new express.Router();
 
 /** POST / { job } =>  { job }
  *
- * job should be { handle, name, description, numEmployees, logoUrl }
+ * job should be { title, salary, equity, company_handle }
  *
- * Returns { handle, name, description, numEmployees, logoUrl }
+ * Returns { title, salary, equity, company_handle }
  *
  * Authorization required: isAdmin
  */
@@ -32,85 +32,86 @@ router.post("/", ensureAdmin, async function (req, res, next) {
   }
 
   const job = await Job.create(req.body);
-  return res.status(201).json({ company });
+  return res.status(201).json({ job });
 });
 
 /** GET /  =>
- *   { jobs: [ { handle, name, description, numEmployees, logoUrl }, ...] }
+ *   { jobs: [ { title, salary, equity, company_handle }, ...] }
  *
  * Can filter on provided search filters:
- * - minEmployees
- * - maxEmployees
- * - nameLike (will find case-insensitive, partial matches)
+ * -title: case-insensitive, matches-any-part-of-string search.
+ * -minSalary: filter to jobs with at least that salary.
+ * -hasEquity: if true, filter to jobs that provide a non-zero amount of equity.
+ * If false or not included in the filtering, list all jobs regardless of equity.
  *
  * Authorization required: none
  */
 
 router.get("/", async function (req, res, next) {
-  const rQuery = { ...req.query };
-  if (Object.keys(rQuery).length) {
-    if (rQuery.minEmployees) {
-      rQuery.minEmployees = parseInt(rQuery.minEmployees);
-    }
-    if (rQuery.maxEmployees) {
-      rQuery.maxEmployees = parseInt(rQuery.maxEmployees);
-    }
-    const validator = jsonschema.validate(rQuery, companyFilterSchema);
-    if (!validator.valid) {
-      const errs = validator.errors.map((e) => e.stack);
-      throw new BadRequestError(errs);
-    } else {
-      const jobs = await Company.findFiltered(rQuery);
-      return res.json({ jobs });
-    }
-  }
-  const jobs = await Company.findAll();
+  // const rQuery = { ...req.query };
+  // if (Object.keys(rQuery).length) {
+  //   if (rQuery.minEmployees) {
+  //     rQuery.minEmployees = parseInt(rQuery.minEmployees);
+  //   }
+  //   if (rQuery.maxEmployees) {
+  //     rQuery.maxEmployees = parseInt(rQuery.maxEmployees);
+  //   }
+  //   const validator = jsonschema.validate(rQuery, companyFilterSchema);
+  //   if (!validator.valid) {
+  //     const errs = validator.errors.map((e) => e.stack);
+  //     throw new BadRequestError(errs);
+  //   } else {
+  //     const jobs = await Company.findFiltered(rQuery);
+  //     return res.json({ jobs });
+  //   }
+  // }
+  const jobs = await Job.findAll();
   return res.json({ jobs });
 });
 
-/** GET /[handle]  =>  { company }
+/** GET /[jobId]  =>  { job }
  *
- *  Company is { handle, name, description, numEmployees, logoUrl, jobs }
+ *  Job is { title, salary, equity, company_handle}
  *   where jobs is [{ id, title, salary, equity }, ...]
  *
  * Authorization required: none
  */
 
-router.get("/:handle", async function (req, res, next) {
-  const company = await Company.get(req.params.handle);
-  return res.json({ company });
+router.get("/:jobId", async function (req, res, next) {
+  const job = await Job.get(req.params.jobId);
+  return res.json({ job });
 });
 
-/** PATCH /[handle] { fld1, fld2, ... } => { company }
+/** PATCH /[job] { fld1, fld2, ... } => { job }
  *
- * Patches company data.
+ * Patches job data.
  *
- * fields can be: { name, description, numEmployees, logo_url }
+ * fields can be: { title, salary, equity, company_handle }
  *
- * Returns { handle, name, description, numEmployees, logo_url }
+ * Returns { id, title, salary, equity, company_handle}
  *
  * Authorization required: isAdmin
  */
 
-router.patch("/:handle", ensureAdmin, async function (req, res, next) {
-  const validator = jsonschema.validate(req.body, companyUpdateSchema);
+router.patch("/:jobId", ensureAdmin, async function (req, res, next) {
+  const validator = jsonschema.validate(req.body, jobUpdateSchema);
   if (!validator.valid) {
     const errs = validator.errors.map((e) => e.stack);
     throw new BadRequestError(errs);
   }
 
-  const company = await Company.update(req.params.handle, req.body);
-  return res.json({ company });
+  const job = await Job.update(req.params.jobId, req.body);
+  return res.json({ job });
 });
 
-/** DELETE /[handle]  =>  { deleted: handle }
+/** DELETE /[jobId]  =>  { deleted: jobId }
  *
  * Authorization: isAdmin
  */
 
-router.delete("/:handle", ensureAdmin, async function (req, res, next) {
-  await Company.remove(req.params.handle);
-  return res.json({ deleted: req.params.handle });
+router.delete("/:jobId", ensureAdmin, async function (req, res, next) {
+  await Job.remove(req.params.jobId);
+  return res.json({ deleted: req.params.jobId });
 });
 
 module.exports = router;
