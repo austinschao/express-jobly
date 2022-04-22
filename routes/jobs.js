@@ -69,7 +69,7 @@ router.get("/", async function (req, res, next) {
   return res.json({ jobs });
 });
 
-/** GET /[jobId]  =>  { job }
+/** GET /[id]  =>  { job }
  *
  *  Job is { title, salary, equity, company_handle}
  *   where jobs is [{ id, title, salary, equity }, ...]
@@ -77,8 +77,8 @@ router.get("/", async function (req, res, next) {
  * Authorization required: none
  */
 
-router.get("/:jobId", async function (req, res, next) {
-  const job = await Job.get(req.params.jobId);
+router.get("/:id", async function (req, res, next) {
+  const job = await Job.get(req.params.id);
   return res.json({ job });
 });
 
@@ -93,25 +93,25 @@ router.get("/:jobId", async function (req, res, next) {
  * Authorization required: isAdmin
  */
 
-router.patch("/:jobId", ensureAdmin, async function (req, res, next) {
+router.patch("/:id", ensureAdmin, async function (req, res, next) {
   const validator = jsonschema.validate(req.body, jobUpdateSchema);
   if (!validator.valid) {
     const errs = validator.errors.map((e) => e.stack);
     throw new BadRequestError(errs);
   }
 
-  const job = await Job.update(req.params.jobId, req.body);
+  const job = await Job.update(req.params.id, req.body);
   return res.json({ job });
 });
 
-/** DELETE /[jobId]  =>  { deleted: jobId }
+/** DELETE /[id]  =>  { deleted: id }
  *
  * Authorization: isAdmin
  */
 
-router.delete("/:jobId", ensureAdmin, async function (req, res, next) {
-  await Job.remove(req.params.jobId);
-  return res.json({ deleted: req.params.jobId });
+router.delete("/:id", ensureAdmin, async function (req, res, next) {
+  await Job.remove(req.params.id);
+  return res.json({ deleted: req.params.id });
 });
 
 module.exports = router;
