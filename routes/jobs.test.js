@@ -4,6 +4,7 @@ const request = require("supertest");
 
 const db = require("../db");
 const app = require("../app");
+const Job = require("../models/job");
 
 const {
   commonBeforeAll,
@@ -12,7 +13,6 @@ const {
   commonAfterAll,
   u1Token,
   testAdminToken,
-  jobId
 } = require("./_testCommon");
 
 beforeAll(commonBeforeAll);
@@ -26,7 +26,7 @@ describe("POST /jobs", function () {
   const newJob = {
     title: "new",
     salary: 100000,
-    equity: "0.081",
+    equity: 0.081,
     companyHandle: "c1",
   };
 
@@ -96,7 +96,7 @@ describe("GET /jobs", function () {
           title: "j3",
           salary: 100000,
           equity: "0.5",
-          companyHandle: "c4",
+          companyHandle: "c3",
         },
       ],
     });
@@ -141,7 +141,7 @@ describe("GET /jobs", function () {
 
 describe("GET /jobs/:jobId", function () {
   test("works for anon", async function () {
-    const resp = await request(app).get(`/jobs/${jobId}`);
+    const resp = await request(app).get(`/jobs/2`);
     expect(resp.body).toEqual({
       company: {
         title: "j1",
@@ -177,7 +177,7 @@ describe("PATCH /jobs/:jobId", function () {
     const resp = await request(app)
       .patch(`/jobs/${jobId}`)
       .send({
-        name: "j1-new",
+        title: "j1-new",
       })
       .set("authorization", `Bearer ${testAdminToken}`);
     expect(resp.body).toEqual({
