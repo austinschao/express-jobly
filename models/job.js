@@ -45,12 +45,13 @@ class Job {
 
   /** Find all jobs.
    *
-   * Returns [{ title, salary, equity, companyHandle }, ...]
+   * Returns [{ id, title, salary, equity, companyHandle }, ...]
    * */
 
   static async findAll() {
     const jobsRes = await db.query(
-      `SELECT title,
+      `SELECT id,
+                title,
                 salary,
                 equity,
                 company_handle AS "companyHandle"
@@ -91,13 +92,13 @@ class Job {
 
   /** Given a job title, return data about job.
    *
-   * Returns { title, salary, equity, companyHandle, logoUrl, jobs }
+   * Returns { id, title, salary, equity, companyHandle, logoUrl, jobs }
    *   where jobs is [{ id, title, salary, equity, companyHandle }, ...]
    *
    * Throws NotFoundError if not found.
    **/
 
-  static async get(title) {
+  static async get(id) {
     const jobRes = await db.query(
       `SELECT id, title,
                 salary,
@@ -105,12 +106,12 @@ class Job {
                 company_handle AS "companyHandle"
            FROM jobs
            WHERE title = $1`,
-      [title]
+      [id]
     );
 
     const job = jobRes.rows[0];
 
-    if (!job) throw new NotFoundError(`No job: ${title}`);
+    if (!job) throw new NotFoundError(`No job: ${id}`);
 
     return job;
   }
@@ -127,21 +128,21 @@ class Job {
    * Throws NotFoundError if not found.
    */
 
-  static async update(title, data) {
+  static async update(id, data) {
     const { setCols, values } = sqlForPartialUpdate(data, {
       companyHandle: "company_handle",
     });
-    const titleVarIdx = "$" + (values.length + 1);
+    const idVarIdx = "$" + (values.length + 1);
 
     const querySql = `
       UPDATE jobs
       SET ${setCols}
-        WHERE title = ${titleVarIdx}
-        RETURNING title, salary, equity, company_handle AS "companyHandle"`;
-    const result = await db.query(querySql, [...values, title]);
+        WHERE id = ${idVarIdx}
+        RETURNING id, title, salary, equity, company_handle AS "companyHandle"`;
+    const result = await db.query(querySql, [...values, idVarIdx]);
     const job = result.rows[0];
 
-    if (!job) throw new NotFoundError(`No job: ${title}`);
+    if (!job) throw new NotFoundError(`No job: ${id}`);
 
     return job;
   }
@@ -151,17 +152,17 @@ class Job {
    * Throws NotFoundError if company not found.
    **/
 
-  static async remove(title) {
+  static async remove(id) {
     const result = await db.query(
       `DELETE
            FROM jobs
-           WHERE title = $1
-           RETURNING title`,
-      [title]
+           WHERE id = $1
+           RETURNING id`,
+      [id]
     );
     const job = result.rows[0];
 
-    if (!job) throw new NotFoundError(`No job: ${title}`);
+    if (!job) throw new NotFoundError(`No job: ${id}`);
   }
 }
 
