@@ -85,10 +85,9 @@ async function commonBeforeAll() {
   const jobId2 = await db.query(`SELECT id FROM jobs WHERE title = 'j2'`);
   const jobId3 = await db.query(`SELECT id FROM jobs WHERE title = 'j3'`);
 
-  jobId.push(jobId1.rows[0].id)
-  jobId.push(jobId2.rows[0].id)
-  jobId.push(jobId3.rows[0].id)
-  console.log("JOBID", jobId)
+  jobId.push(jobId1.rows[0].id);
+  jobId.push(jobId2.rows[0].id);
+  jobId.push(jobId3.rows[0].id);
 }
 
 async function commonBeforeEach() {
@@ -112,5 +111,5 @@ module.exports = {
   commonAfterAll,
   u1Token,
   testAdminToken,
-  jobId
+  jobId,
 };

@@ -13,7 +13,7 @@ const {
   commonAfterAll,
   u1Token,
   testAdminToken,
-  jobId
+  jobId,
 } = require("./_testCommon");
 
 beforeAll(commonBeforeAll);
@@ -82,21 +82,21 @@ describe("GET /jobs", function () {
     expect(resp.body).toEqual({
       jobs: [
         {
-          id:`${jobId[0]}`,
+          id: expect.any(Number),
           title: "j1",
           salary: 100000,
           equity: "0.5",
           companyHandle: "c1",
         },
         {
-          id:`${jobId[1]}`,
+          id: expect.any(Number),
           title: "j2",
           salary: 100000,
           equity: "0.5",
           companyHandle: "c2",
         },
         {
-          id:`${jobId[2]}`,
+          id: expect.any(Number),
           title: "j3",
           salary: 100000,
           equity: "0.5",
@@ -147,11 +147,12 @@ describe("GET /jobs/:id", function () {
   test("works for anon", async function () {
     const resp = await request(app).get(`/jobs/${jobId[0]}`);
     expect(resp.body).toEqual({
-      company: {
+      job: {
+        id: `${jobId[0]}`,
         title: "j1",
         salary: 100000,
         equity: "0.5",
-        companyHandle: "c1",
+        company_handle: "c1",
       },
     });
   });
