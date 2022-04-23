@@ -99,13 +99,14 @@ class Job {
    **/
 
   static async get(id) {
+    console.log(id);
     const jobRes = await db.query(
       `SELECT id, title,
                 salary,
                 equity,
                 company_handle AS "companyHandle"
            FROM jobs
-           WHERE title = $1`,
+           WHERE id = $1`,
       [id]
     );
 
@@ -139,7 +140,7 @@ class Job {
       SET ${setCols}
         WHERE id = ${idVarIdx}
         RETURNING id, title, salary, equity, company_handle AS "companyHandle"`;
-    const result = await db.query(querySql, [...values, idVarIdx]);
+    const result = await db.query(querySql, [...values, id]);
     const job = result.rows[0];
 
     if (!job) throw new NotFoundError(`No job: ${id}`);
